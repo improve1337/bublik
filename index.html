@@ -1,133 +1,868 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Voice Assistant</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bublik — голосовой ассистент</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Reset & Base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+        :root {
+            --bg: #fcf7f5;
+            --bg-card: rgba(255, 255, 255, 0.7);
+            --text: #1e1e2a;
+            --text-secondary: #4a4a5a;
+            --text-muted: #7a7a8a;
+            --border: rgba(0, 0, 0, 0.06);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.14);
+            --gradient: linear-gradient(135deg, #ff9fb1, #ffc2a6);
+            --gradient-hover: linear-gradient(135deg, #ff8aa0, #ffb892);
+            --leaf-start: #ffc6b2;
+            --leaf-end: #ff9da7;
+            --badge-bg: rgba(255, 159, 177, 0.15);
+            --badge-text: #d45a7a;
+            --toggle-bg: #e8e0dd;
+            --code-bg: rgba(0, 0, 0, 0.04);
+            --scrollbar: #d0c8c4;
+            --card-hover: rgba(255, 159, 177, 0.06);
+            --icon-circle: rgba(255, 159, 177, 0.18);
+        }
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+        [data-theme="dark"] {
+            --bg: #12121a;
+            --bg-card: rgba(30, 30, 46, 0.85);
+            --text: #ececf0;
+            --text-secondary: #b0b0c8;
+            --text-muted: #7878a0;
+            --border: rgba(255, 255, 255, 0.06);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.8);
+            --leaf-start: #b07a8a;
+            --leaf-end: #8a5a6a;
+            --badge-bg: rgba(255, 159, 177, 0.12);
+            --badge-text: #ff9fb1;
+            --toggle-bg: #2a2a3a;
+            --code-bg: rgba(255, 255, 255, 0.05);
+            --scrollbar: #3a3a4a;
+            --card-hover: rgba(255, 159, 177, 0.08);
+            --icon-circle: rgba(255, 159, 177, 0.20);
+        }
 
-body{
-    overflow:hidden;
-    font-family:'Poppins',sans-serif;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:linear-gradient(180deg,#fffdfb,#fff3ef,#ffeceb);
-    position:relative;
-}
+        html {
+            scroll-behavior: smooth;
+        }
 
-/* Листики */
-.leaf{
-    position:absolute;
-    top:-60px;
-    width:24px;
-    height:24px;
-    background:linear-gradient(135deg,#ffc6b2,#ff9da7);
-    border-radius:0 100% 0 100%;
-    opacity:.8;
-    animation:fall linear infinite;
-}
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background .4s ease, color .4s ease;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-@keyframes fall{
-    0%{
-        transform:translateY(-60px) rotate(0deg);
-    }
-    100%{
-        transform:translateY(110vh) rotate(360deg);
-    }
-}
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar);
+            border-radius: 12px;
+        }
 
-.container{
-    text-align:center;
-    z-index:10;
-}
+        /* ── Leaves ── */
+        .leaf {
+            position: fixed;
+            top: -60px;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--leaf-start), var(--leaf-end));
+            border-radius: 0 100% 0 100%;
+            opacity: .5;
+            pointer-events: none;
+            animation: fall linear infinite;
+            z-index: 0;
+            transition: background .4s ease;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-60px) rotate(0deg) scale(1);
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg) scale(0.6);
+            }
+        }
 
-.top{
-    font-size:34px;
-    font-weight:700;
-    color:#555;
-    margin-bottom:35px;
-    letter-spacing:2px;
-}
+        /* ── Theme Toggle ── */
+        .theme-toggle {
+            position: fixed;
+            top: 28px;
+            right: 28px;
+            z-index: 100;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: background .3s, box-shadow .3s, border .3s;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            user-select: none;
+        }
+        .theme-toggle:hover {
+            box-shadow: var(--shadow-hover);
+        }
+        .theme-toggle .icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+        .theme-toggle .label {
+            display: none;
+        }
+        @media (min-width: 600px) {
+            .theme-toggle .label {
+                display: inline;
+            }
+        }
+        .theme-toggle .switch {
+            width: 44px;
+            height: 24px;
+            background: var(--toggle-bg);
+            border-radius: 40px;
+            position: relative;
+            transition: background .3s;
+            flex-shrink: 0;
+        }
+        .theme-toggle .switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform .3s, background .3s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+        }
+        [data-theme="dark"] .theme-toggle .switch {
+            background: #4a4a6a;
+        }
+        [data-theme="dark"] .theme-toggle .switch::after {
+            transform: translateX(20px);
+            background: #f0e8e4;
+        }
 
-.bottom{
-    font-size:70px;
-    font-weight:900;
-    color:#222;
-    text-transform:uppercase;
-    letter-spacing:5px;
-    margin-bottom:40px;
-    text-shadow:0 6px 18px rgba(0,0,0,.15);
-}
+        /* ── Container ── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 30px 60px;
+            position: relative;
+            z-index: 2;
+        }
 
-.download{
-    display:inline-block;
-    text-decoration:none;
-    background:linear-gradient(45deg,#ff9fb1,#ffc2a6);
-    color:white;
-    font-size:22px;
-    font-weight:700;
-    padding:18px 60px;
-    border-radius:50px;
-    transition:.3s;
-    box-shadow:0 10px 25px rgba(255,150,150,.35);
-}
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 30px 0 50px;
+            position: relative;
+        }
 
-.download:hover{
-    transform:translateY(-4px) scale(1.05);
-    box-shadow:0 15px 35px rgba(255,150,150,.45);
-}
+        .hero .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            padding: 8px 22px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            margin-bottom: 28px;
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border);
+            transition: background .3s, color .3s;
+        }
+        .hero .badge .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff9fb1;
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: .3;
+                transform: scale(.7);
+            }
+        }
 
-.footer{
-    position:absolute;
-    bottom:20px;
-    width:100%;
-    text-align:center;
-    color:#666;
-    font-size:15px;
-    font-weight:600;
-}
-</style>
+        .hero h1 {
+            font-size: clamp(52px, 10vw, 100px);
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            transition: background .3s;
+        }
+
+        .hero .sub {
+            font-size: clamp(18px, 3vw, 30px);
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .hero .tagline {
+            font-size: clamp(16px, 1.6vw, 22px);
+            color: var(--text-muted);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .hero .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+            padding: 16px 44px;
+            border-radius: 60px;
+            transition: all .3s;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-primary {
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(255, 150, 150, .3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 45px rgba(255, 150, 150, .45);
+            background: var(--gradient-hover);
+        }
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+        .btn-secondary:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .version-chip {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--code-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            letter-spacing: .3px;
+            transition: background .3s, color .3s;
+        }
+
+        /* ── Features (НОВЫЙ ДИЗАЙН) ── */
+        .features {
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            transition: border .3s;
+        }
+
+        .features .section-title {
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .features .section-sub {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 18px;
+            margin-bottom: 50px;
+            font-weight: 400;
+        }
+
+        /* сетка 3 колонки */
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 700px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1000px) {
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* карточка нового стиля */
+        .feature-card {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 24px 30px;
+            transition: all .3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-card:hover {
+            border-color: var(--badge-text);
+            background: var(--card-hover);
+            transform: translateY(-4px);
+        }
+
+        .feature-card .icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--icon-circle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+            transition: background .3s;
+        }
+
+        .feature-card:hover .icon-wrap {
+            background: var(--badge-bg);
+        }
+
+        .feature-card .content {
+            flex: 1;
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .feature-card .tag {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--badge-text);
+            background: var(--badge-bg);
+            padding: 2px 14px;
+            border-radius: 40px;
+        }
+
+        /* полная карточка (напоминания) — занимает все колонки */
+        .feature-card.full {
+            grid-column: 1 / -1;
+            background: var(--bg-card);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card.full:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--badge-text);
+        }
+
+        .feature-card.full .icon-wrap {
+            background: var(--badge-bg);
+            width: 64px;
+            height: 64px;
+            font-size: 34px;
+        }
+
+        /* ── Fixes ── */
+        .fixes-section {
+            margin-top: 60px;
+            padding: 40px 30px;
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            transition: all .3s;
+        }
+        .fixes-section h2 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .fixes-section ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        @media (min-width: 600px) {
+            .fixes-section ul {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .fixes-section ul li {
+            padding: 10px 16px 10px 28px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 400;
+            border-left: 3px solid var(--badge-text);
+            background: var(--code-bg);
+            border-radius: 0 12px 12px 0;
+            transition: background .3s;
+        }
+        .fixes-section ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 6px;
+            top: 10px;
+            color: var(--badge-text);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* ── Install ── */
+        .install-steps {
+            margin-top: 50px;
+            padding: 40px 30px;
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            transition: all .3s;
+        }
+        .install-steps h2 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        .install-steps ol {
+            list-style: none;
+            counter-reset: step;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        @media (min-width: 600px) {
+            .install-steps ol {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .install-steps ol li {
+            counter-increment: step;
+            padding: 14px 18px 14px 56px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+            font-weight: 400;
+            background: var(--code-bg);
+            border-radius: 16px;
+            transition: background .3s;
+        }
+        .install-steps ol li::before {
+            content: counter(step);
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gradient);
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .install-steps ol li strong {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            margin-top: 70px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: .3px;
+            transition: border .3s, color .3s;
+        }
+        .footer span {
+            opacity: .6;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 500px) {
+            .container {
+                padding: 80px 16px 40px;
+            }
+            .hero .actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .theme-toggle {
+                top: 16px;
+                right: 16px;
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+            .theme-toggle .switch {
+                width: 36px;
+                height: 20px;
+            }
+            .theme-toggle .switch::after {
+                width: 16px;
+                height: 16px;
+            }
+            [data-theme="dark"] .theme-toggle .switch::after {
+                transform: translateX(16px);
+            }
+            .feature-card {
+                padding: 20px 18px 24px;
+            }
+            .feature-card.full {
+                padding: 24px 18px;
+            }
+            .fixes-section,
+            .install-steps {
+                padding: 28px 18px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="top">Voice Assistant</div>
+    <!-- ─── Leaves ─── -->
+    <div id="leaves-container"></div>
 
-    <div class="bottom">BUBLIK</div>
+    <!-- ─── Theme Toggle ─── -->
+    <div class="theme-toggle" id="themeToggle" role="button" tabindex="0" aria-label="Переключить тему">
+        <span class="icon" id="themeIcon">☀️</span>
+        <span class="label" id="themeLabel">Светлая</span>
+        <span class="switch"></span>
+    </div>
 
-    <a class="download"
-       href="https://drive.google.com/file/d/1pBCU2xhicNjMO143l3YD2oVNVz3G-x-6/view?usp=drive_link"
-       target="_blank">
-       Скачать
-    </a>
+    <!-- ─── Main ─── -->
+    <div class="container">
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge">
+                <span class="dot"></span>
+                Beta v0.1 · Голосовой ассистент
+            </div>
+
+            <h1>Бублик</h1>
+            <div class="sub">Voice Assistant</div>
+            <p class="tagline">
+                Офлайн-распознавание, естественная озвучка и полный контроль голосом —<br />
+                просто скажите «Бублик».
+            </p>
+
+            <div class="actions">
+                <a class="btn btn-primary"
+                href="https://drive.google.com/file/d/1pBCU2xhicNjMO143l3YD2oVNVz3G-x-6/view?usp=drive_link"
+                target="_blank">
+                ⬇ Скачать
+            </a>
+            <a class="btn btn-secondary" href="#features">
+                ✦ Подробнее
+            </a>
+        </div>
+
+        <div class="version-chip">текущая версия: beta v0.1</div>
+    </section>
+
+    <!-- Features (новый дизайн) -->
+    <section class="features" id="features">
+        <h2 class="section-title">🔥 Ключевые возможности</h2>
+        <p class="section-sub">Всё, что умеет Бублик — из коробки, без интернета</p>
+
+        <div class="features-grid">
+
+            <div class="feature-card">
+                <div class="icon-wrap">🎤</div>
+                <div class="content">
+                    <h3>Мгновенная активация</h3>
+                    <p>Скажите <strong>«Бублик»</strong>, и ассистент готов слушать команды. Hands‑free управление без кнопок.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🧠</div>
+                <div class="content">
+                    <h3>Распознавание речи</h3>
+                    <p>На основе <strong>Vosk</strong> (русская модель) — работает полностью офлайн, без интернета и задержек.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🗣️</div>
+                <div class="content">
+                    <h3>Естественная озвучка</h3>
+                    <p>Голос с русским акцентом, скорость и громкость настроены для комфортного восприятия.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">📝</div>
+                <div class="content">
+                    <h3>Заметки в Discord</h3>
+                    <p>Отправляйте голосовые заметки в Discord через Webhook — настройка при первом запуске.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🧮</div>
+                <div class="content">
+                    <h3>Калькулятор</h3>
+                    <p>Считайте примеры голосом («два плюс два»). Результат сохраняется в память и может быть отправлен в Discord.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🌤️</div>
+                <div class="content">
+                    <h3>Погода</h3>
+                    <p>При первом запуске спросит ваш город, затем откроет Яндекс.Погоду. Транслитерация автоматическая.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🌐</div>
+                <div class="content">
+                    <h3>Быстрый запуск</h3>
+                    <p>Откройте YouTube, браузер или Discord одной командой — без лишних кликов.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🎵</div>
+                <div class="content">
+                    <h3>Управление плеером</h3>
+                    <p>Переключайте треки командами «следующий трек» и «назад» (медиа-клавиши).</p>
+                </div>
+            </div>
+
+            <!-- полная карточка -->
+            <div class="feature-card full">
+                <div class="icon-wrap">⏰</div>
+                <div class="content">
+                    <h3>Напоминания</h3>
+                    <p>Установите напоминание с текстом и временем (форматы: «в 15:30», «через 10 минут», «десять ноль ноль»). В назначенное время Бублик проговорит текст и отправит его в Discord. Вы можете посмотреть список активных напоминаний или отменить все сразу.</p>
+                    <span class="tag">сохраняются в reminders.json</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">🪟</div>
+                <div class="content">
+                    <h3>Управление окном</h3>
+                    <p>Команда «свернись» прячет консоль в трей, пункт меню «Показать консоль» восстанавливает её.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon-wrap">👤</div>
+                <div class="content">
+                    <h3>Профиль пользователя</h3>
+                    <p>При первом запуске настройте имя, возраст, город и Discord Webhook. Данные сохраняются в папке пользователя.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Fixes & Improvements -->
+    <section class="fixes-section">
+        <h2>🛠 Исправления и улучшения</h2>
+        <ul>
+            <li>Устранена ошибка <strong>run loop already started</strong> при озвучке — теперь каждая фраза воспроизводится корректно.</li>
+            <li>Консоль содержит только диалог и служебные маркеры (<strong>[*]</strong> — активация, <strong>[~]</strong> — системные события), технические ошибки скрыты.</li>
+            <li>Напоминания сохраняются в файл <strong>reminders.json</strong> и не пропадают после перезапуска.</li>
+            <li>Полная поддержка русской речи — модели и транслитерация работают из коробки.</li>
+        </ul>
+    </section>
+
+    <!-- Install -->
+    <section class="install-steps">
+        <h2>📦 Установка и запуск</h2>
+        <ol>
+            <li>Скачайте исполняемый файл <strong>Bublik.exe</strong> (ссылка на GitHub).</li>
+            <li>При первом запуске потребуется скачать модель распознавания речи (откроется страница загрузки).</li>
+            <li>Распакуйте модель в папку <strong>C:\Users\Ваше_имя\model</strong>.</li>
+            <li>Запустите <strong>Bublik.exe</strong> — пройдите голосовую настройку.</li>
+            <li>Готово! Говорите <strong>«Бублик»</strong> и управляйте голосом.</li>
+        </ol>
+        <p style="margin-top:24px; color:var(--text-muted); font-size:15px; font-weight:500;">
+            ⚠️ Бета-версия (v0.1) · Это первый публичный релиз, мы активно работаем над улучшениями.<br />
+            Если вы нашли ошибку или хотите предложить идею — пишите в Issues.<br />
+            <span style="font-weight:700; color:var(--badge-text);">Спасибо, что выбираете Бублика!</span>
+        </p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        © 2026 Все права защищены · Автор: improve1337
+        <span>·</span> Bublik v0.1-beta
+    </footer>
+
 </div>
 
-<div class="footer">
-© 2026 Все права защищены • Автор: improve1337
-</div>
-
+<!-- ─── Scripts ─── -->
 <script>
-for(let i=0;i<35;i++){
-    const leaf=document.createElement('div');
-    leaf.className='leaf';
+    (function() {
+        // ---- Leaves ----
+        const container = document.getElementById('leaves-container');
+        for (let i = 0; i < 40; i++) {
+            const leaf = document.createElement('div');
+            leaf.className = 'leaf';
+            leaf.style.left = Math.random() * 100 + 'vw';
+            leaf.style.animationDuration = (7 + Math.random() * 10) + 's';
+            leaf.style.animationDelay = Math.random() * 8 + 's';
+            leaf.style.transform = 'scale(' + (0.5 + Math.random() * 1.1) + ')';
+            leaf.style.width = (20 + Math.random() * 20) + 'px';
+            leaf.style.height = (20 + Math.random() * 20) + 'px';
+            container.appendChild(leaf);
+        }
 
-    leaf.style.left=Math.random()*100+'vw';
-    leaf.style.animationDuration=(6+Math.random()*8)+'s';
-    leaf.style.animationDelay=Math.random()*6+'s';
-    leaf.style.transform='scale('+(0.6+Math.random()*1)+')';
+        // ---- Theme Toggle ----
+        const toggle = document.getElementById('themeToggle');
+        const icon = document.getElementById('themeIcon');
+        const label = document.getElementById('themeLabel');
+        const html = document.documentElement;
 
-    document.body.appendChild(leaf);
-}
+        const stored = localStorage.getItem('bublik-theme');
+        if (stored === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+            icon.textContent = '🌙';
+            label.textContent = 'Тёмная';
+        } else {
+            html.removeAttribute('data-theme');
+            icon.textContent = '☀️';
+            label.textContent = 'Светлая';
+        }
+
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('bublik-theme', 'light');
+                icon.textContent = '☀️';
+                label.textContent = 'Светлая';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('bublik-theme', 'dark');
+                icon.textContent = '🌙';
+                label.textContent = 'Тёмная';
+            }
+        });
+
+        toggle.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle.click();
+            }
+        });
+
+        // ---- Smooth anchor ----
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+    })();
 </script>
 
 </body>
