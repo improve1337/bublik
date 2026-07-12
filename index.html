@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Assistant</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    font-family:'Poppins',sans-serif;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(180deg,#fffdfb,#fff3ef,#ffeceb);
+    position:relative;
+}
+
+/* Листики */
+.leaf{
+    position:absolute;
+    top:-60px;
+    width:24px;
+    height:24px;
+    background:linear-gradient(135deg,#ffc6b2,#ff9da7);
+    border-radius:0 100% 0 100%;
+    opacity:.8;
+    animation:fall linear infinite;
+}
+
+@keyframes fall{
+    0%{
+        transform:translateY(-60px) rotate(0deg);
+    }
+    100%{
+        transform:translateY(110vh) rotate(360deg);
+    }
+}
+
+.container{
+    text-align:center;
+    z-index:10;
+}
+
+.top{
+    font-size:34px;
+    font-weight:700;
+    color:#555;
+    margin-bottom:35px;
+    letter-spacing:2px;
+}
+
+.bottom{
+    font-size:70px;
+    font-weight:900;
+    color:#222;
+    text-transform:uppercase;
+    letter-spacing:5px;
+    margin-bottom:40px;
+    text-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+
+.download{
+    display:inline-block;
+    text-decoration:none;
+    background:linear-gradient(45deg,#ff9fb1,#ffc2a6);
+    color:white;
+    font-size:22px;
+    font-weight:700;
+    padding:18px 60px;
+    border-radius:50px;
+    transition:.3s;
+    box-shadow:0 10px 25px rgba(255,150,150,.35);
+}
+
+.download:hover{
+    transform:translateY(-4px) scale(1.05);
+    box-shadow:0 15px 35px rgba(255,150,150,.45);
+}
+
+.footer{
+    position:absolute;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+    color:#666;
+    font-size:15px;
+    font-weight:600;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top">Voice Assistant</div>
+
+    <div class="bottom">BUBLIK</div>
+
+    <a class="download"
+       href="https://drive.google.com/file/d/1pBCU2xhicNjMO143l3YD2oVNVz3G-x-6/view?usp=drive_link"
+       target="_blank">
+       Скачать
+    </a>
+</div>
+
+<div class="footer">
+© 2026 Все права защищены • Автор: improve1337
+</div>
+
+<script>
+for(let i=0;i<35;i++){
+    const leaf=document.createElement('div');
+    leaf.className='leaf';
+
+    leaf.style.left=Math.random()*100+'vw';
+    leaf.style.animationDuration=(6+Math.random()*8)+'s';
+    leaf.style.animationDelay=Math.random()*6+'s';
+    leaf.style.transform='scale('+(0.6+Math.random()*1)+')';
+
+    document.body.appendChild(leaf);
+}
+</script>
+
+</body>
+</html>
