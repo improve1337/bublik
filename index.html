@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Bublik v0.2 — голосовой ассистент для Windows с офлайн-распознаванием, кибер-панк интерфейсом и десятками голосовых команд." />
-    <title>Bublik v0.2 — голосовой ассистент</title>
+    <meta name="description" content="Bublik v0.3 — голосовой ассистент для Windows с офлайн-распознаванием, локальным ИИ и базами данных игр и сленга." />
+    <title>Bublik v0.3 — голосовой ассистент</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <style>
         /* ── Reset & Base ── */
@@ -39,6 +39,7 @@
             --cmd-border: #2a2a2a;
             --cmd-title-bg: #1e1e1e;
             --glow-color: rgba(255, 159, 177, 0.25);
+            --card-glow: 0 0 20px rgba(212, 90, 122, 0.15);
         }
 
         [data-theme="dark"] {
@@ -64,6 +65,7 @@
             --cmd-border: #333;
             --cmd-title-bg: #2a2a2a;
             --glow-color: rgba(255, 159, 177, 0.30);
+            --card-glow: 0 0 25px rgba(255, 159, 177, 0.20);
         }
 
         html {
@@ -80,7 +82,6 @@
             position: relative;
         }
 
-        /* ── Scrollbar ── */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -92,28 +93,30 @@
             border-radius: 12px;
         }
 
-        /* ── Leaves ── */
-        .leaf {
+        /* ── Particles ── */
+        .particle {
             position: fixed;
-            top: -60px;
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, var(--leaf-start), var(--leaf-end));
-            border-radius: 0 100% 0 100%;
-            opacity: .5;
+            border-radius: 50%;
             pointer-events: none;
-            animation: fall linear infinite;
             z-index: 0;
-            transition: background .4s ease;
+            background: radial-gradient(circle, var(--leaf-start), var(--leaf-end));
+            opacity: 0.3;
+            filter: blur(6px);
             will-change: transform;
-            filter: blur(4px); /* размытие листьев */
+            animation: float linear infinite;
+            transition: background .4s ease;
         }
-        @keyframes fall {
+        @keyframes float {
             0% {
-                transform: translateY(-60px) rotate(0deg) scale(1);
+                transform: translateY(110vh) scale(0.2) rotate(0deg);
+                opacity: 0.2;
+            }
+            50% {
+                opacity: 0.5;
             }
             100% {
-                transform: translateY(110vh) rotate(720deg) scale(0.6);
+                transform: translateY(-20vh) scale(1.2) rotate(720deg);
+                opacity: 0;
             }
         }
 
@@ -262,15 +265,8 @@
             animation: pulse-dot 1.8s ease-in-out infinite;
         }
         @keyframes pulse-dot {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: .3;
-                transform: scale(.7);
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .3; transform: scale(.7); }
         }
 
         .hero h1 {
@@ -301,23 +297,8 @@
             font-weight: 700;
             letter-spacing: 2px;
             text-shadow: 0 0 20px var(--glow-color);
-        }
-
-        .hero .sub {
-            font-size: clamp(18px, 3vw, 30px);
-            font-weight: 700;
-            color: var(--text-secondary);
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-
-        .hero .tagline {
-            font-size: clamp(16px, 1.6vw, 22px);
-            color: var(--text-muted);
-            font-weight: 400;
-            max-width: 700px;
-            margin: 0 auto 40px;
-            line-height: 1.6;
+            transition: all 0.15s;
+            display: inline-block;
         }
 
         .hero .actions {
@@ -388,6 +369,10 @@
             border: 1px solid var(--border);
             background: var(--cmd-bg);
             transition: border .3s, box-shadow .3s;
+            cursor: pointer;
+        }
+        .cmd-preview:hover {
+            box-shadow: var(--shadow-hover), 0 0 60px var(--glow-color);
         }
         .cmd-preview .cmd-header {
             background: var(--cmd-title-bg);
@@ -464,7 +449,6 @@
             50% { opacity: 0; }
         }
 
-        /* анимация печати для первой строки */
         .cmd-body .typewriter {
             display: inline-block;
             overflow: hidden;
@@ -473,7 +457,7 @@
             width: 0;
         }
 
-        /* ── CMD welcome message ── */
+        /* ── CMD welcome ── */
         .cmd-welcome {
             text-align: center;
             margin-top: 20px;
@@ -487,271 +471,119 @@
             padding: 12px 36px;
         }
 
-        /* ── Features ── */
-        .features {
-            margin-top: 20px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
-            transition: border .3s;
+        /* ── Полноширинный раздел с плитками ── */
+        .features-full {
+            width: 100%;
+            padding: 40px 30px;
+            background: transparent;
+            position: relative;
+            z-index: 2;
         }
 
-        .features .section-title {
-            font-size: clamp(28px, 4vw, 42px);
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
+        .features-full .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .features .section-sub {
+        .features-full .section-header h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+        }
+        .features-full .section-sub {
             text-align: center;
             color: var(--text-muted);
             font-size: 18px;
-            margin-bottom: 50px;
             font-weight: 400;
+            max-width: 1200px;
+            margin: 0 auto 20px;
         }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: 1fr;
+        .tiles-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 24px;
-        }
-        @media (min-width: 700px) {
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (min-width: 1000px) {
-            .features-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
+        /* ── квадратные плитки ── */
         .feature-card {
+            flex: 0 0 auto;
+            width: 280px;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 24px 22px;
+            border-radius: 20px;
             background: var(--bg-card);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 28px 24px 30px;
-            transition: all .3s ease;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-            box-shadow: var(--shadow);
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
+            border: 1px solid var(--badge-text);
+            box-shadow: var(--shadow), var(--card-glow);
+            transition: box-shadow 0.3s ease;
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
         }
-        .feature-card:hover {
-            border-color: var(--badge-text);
-            background: var(--bg-card);
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-hover), 0 0 30px var(--glow-color);
-        }
+
         .feature-card .icon-wrap {
-            width: 56px;
-            height: 56px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             background: var(--icon-circle);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 26px;
             flex-shrink: 0;
-            transition: background .3s;
-        }
-        .feature-card:hover .icon-wrap {
-            background: var(--badge-bg);
+            margin-bottom: 12px;
         }
         .feature-card .content {
             flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         .feature-card h3 {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 700;
             margin-bottom: 6px;
             letter-spacing: -0.3px;
+            color: var(--text);
         }
         .feature-card p {
             color: var(--text-secondary);
-            font-size: 15px;
-            line-height: 1.7;
+            font-size: 14px;
+            line-height: 1.6;
             font-weight: 400;
             margin: 0;
+            flex: 1;
+            overflow: hidden;
         }
         .feature-card .tag {
             display: inline-block;
             margin-top: 10px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: .5px;
             color: var(--badge-text);
             background: var(--badge-bg);
-            padding: 2px 14px;
+            padding: 2px 12px;
             border-radius: 40px;
+            align-self: flex-start;
         }
         .feature-card.full {
-            grid-column: 1 / -1;
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 32px 30px;
-            box-shadow: var(--shadow);
-        }
-        .feature-card.full:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-hover), 0 0 40px var(--glow-color);
-            border-color: var(--badge-text);
-        }
-        .feature-card.full .icon-wrap {
-            background: var(--badge-bg);
-            width: 64px;
-            height: 64px;
-            font-size: 34px;
-        }
-
-        /* ── Что нового ── */
-        .fixes-section {
-            margin-top: 60px;
-            padding: 40px 30px;
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            box-shadow: var(--shadow);
-            transition: all .3s;
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
-            animation-delay: 0.3s;
-        }
-        .fixes-section h2 {
-            font-size: 26px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .fixes-section ul {
-            list-style: none;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-        @media (min-width: 600px) {
-            .fixes-section ul {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        .fixes-section ul li {
-            padding: 10px 16px 10px 28px;
-            position: relative;
-            color: var(--text-secondary);
-            font-size: 15px;
-            line-height: 1.6;
-            font-weight: 400;
-            border-left: 3px solid var(--badge-text);
-            background: var(--code-bg);
-            border-radius: 0 12px 12px 0;
-            transition: background .3s;
-        }
-        .fixes-section ul li::before {
-            content: '✦';
-            position: absolute;
-            left: 6px;
-            top: 10px;
-            color: var(--badge-text);
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        /* ── Install ── */
-        .install-steps {
-            margin-top: 50px;
-            padding: 40px 30px;
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            box-shadow: var(--shadow);
-            transition: all .3s;
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
-            animation-delay: 0.4s;
-        }
-        .install-steps h2 {
-            font-size: 26px;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-        .install-steps ol {
-            list-style: none;
-            counter-reset: step;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
-        }
-        @media (min-width: 600px) {
-            .install-steps ol {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        .install-steps ol li {
-            counter-increment: step;
-            padding: 14px 18px 14px 56px;
-            position: relative;
-            color: var(--text-secondary);
-            font-size: 15px;
-            line-height: 1.6;
-            font-weight: 400;
-            background: var(--code-bg);
-            border-radius: 16px;
-            transition: background .3s;
-        }
-        .install-steps ol li::before {
-            content: counter(step);
-            position: absolute;
-            left: 14px;
-            top: 14px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--gradient);
-            color: #fff;
-            font-weight: 700;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .install-steps ol li strong {
-            color: var(--text);
-            font-weight: 700;
-        }
-
-        /* ── Footer ── */
-        .footer {
-            margin-top: 70px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: .3px;
-            transition: border .3s, color .3s;
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
-            animation-delay: 0.5s;
-        }
-        .footer span {
-            opacity: .6;
+            width: 280px;
+            height: 280px;
+            padding: 24px 22px;
         }
 
         /* ── Responsive ── */
@@ -781,14 +613,20 @@
                 transform: translateX(16px);
             }
             .feature-card {
-                padding: 20px 18px 24px;
+                width: 220px;
+                height: 220px;
+                padding: 16px;
             }
-            .feature-card.full {
-                padding: 24px 18px;
+            .feature-card .icon-wrap {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
             }
-            .fixes-section,
-            .install-steps {
-                padding: 28px 18px;
+            .feature-card h3 {
+                font-size: 16px;
+            }
+            .feature-card p {
+                font-size: 13px;
             }
             .cmd-preview .cmd-body {
                 font-size: 12px;
@@ -807,13 +645,35 @@
             .hero h1 .bublik-eyes {
                 font-size: 0.8em;
             }
+            .features-full {
+                padding: 20px 10px;
+            }
+        }
+
+        /* ── Footer ── */
+        .footer {
+            margin-top: 70px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: .3px;
+            transition: border .3s, color .3s;
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+            animation-delay: 0.6s;
+        }
+        .footer span {
+            opacity: .6;
         }
     </style>
 </head>
 <body>
 
-    <!-- ─── Leaves ─── -->
-    <div id="leaves-container"></div>
+    <!-- ─── Particles ─── -->
+    <div id="particles-container"></div>
 
     <!-- ─── Theme Toggle ─── -->
     <div class="theme-toggle" id="themeToggle" role="button" tabindex="0" aria-label="Переключить тему">
@@ -829,222 +689,208 @@
         <section class="hero fade-in fade-in-delay-1">
             <div class="badge">
                 <span class="dot"></span>
-                Beta v0.2 · Голосовой ассистент
+                Beta v0.3 · Голосовой ассистент + ИИ
             </div>
 
             <h1>
                 <span class="bublik-text">Бублик</span>
                 <span class="bublik-eyes" id="bublikEyes">0_o</span>
             </h1>
-            <div class="sub">Voice Assistant</div>
-            <p class="tagline">
-                Полностью офлайн, десятки голосовых команд —<br />
-                просто скажите «Бублик» и управляйте компьютером голосом.
-            </p>
 
             <div class="actions">
                 <a class="btn btn-primary"
-                   href="https://drive.google.com/file/d/1J85roSSOVjjEguI-swwWgbZ0b-_g9npa/view?usp=drive_link"
+                   href="https://drive.google.com/file/d/1ecWPrziRVJm9kuWOSZ5I4PPkvUQQlttM/view?usp=drive_link"
                    target="_blank">
-                    ⬇ Скачать v0.2
+                    ⬇ Скачать v0.3
                 </a>
                 <a class="btn btn-secondary" href="#features">
                     ✦ Подробнее
                 </a>
             </div>
 
-            <div class="version-chip">текущая версия: beta v0.2</div>
+            <div class="version-chip">текущая версия: beta v0.3</div>
         </section>
 
         <!-- ─── CMD Preview ─── -->
-        <div class="cmd-preview fade-in fade-in-delay-2">
+        <div class="cmd-preview fade-in fade-in-delay-2" id="cmdPreview">
             <div class="cmd-header">
                 <div class="cmd-dots">
                     <span class="cmd-dot"></span>
                     <span class="cmd-dot"></span>
                     <span class="cmd-dot"></span>
                 </div>
-                <span class="cmd-title">Bublik Console v0.2</span>
+                <span class="cmd-title">Bublik Console v0.3</span>
             </div>
-            <div class="cmd-body">
-<span class="ascii-art typewriter">Бублик — Голосовой Ассистент</span>
+            <div class="cmd-body" id="cmdBody">
+                <span class="ascii-art typewriter">Бублик — Голосовой Ассистент + AI</span>
 
-<span class="state">[0_0]</span> Активация: бублик
-<span class="highlight">Бублик:</span> я тут
-<span class="user">Вы:</span> сколько времени?
-<span class="highlight">Бублик:</span> 15:49
-<span class="user">Вы:</span> Открой ютуб
-<span class="highlight">Бублик:</span> секунду...
-<span class="user">Вы:</span> Поставь намоминание
-<span class="highlight">Бублик:</span> что вы хотите чтобы я вам напомнил?
-<span class="user">Вы:</span> пойти в больницу
-<span class="highlight">Бублик:</span> на какое время поставить напоминание?
-<span class="user">Вы:</span> 11:00
-<span class="highlight">Бублик:</span> поставлено напоминание на 11:00 [пойти в больницу]
-<span class="cmd-cursor"></span>
+                <span class="state">[0_0]</span> Активация: бублик
+                <span class="highlight">Бублик:</span> я тут
+                <span class="user">Вы:</span> сколько времени?
+                <span class="highlight">Бублик:</span> 15:49
+                <span class="user">Вы:</span> Открой ютуб
+                <span class="highlight">Бублик:</span> секунду...
+                <span class="user">Вы:</span> Расскажи про Доту
+                <span class="highlight">Бублик:</span> Дота 2 — командная MOBA-игра 5 на 5...
+                <span class="user">Вы:</span> Что значит «крафт»?
+                <span class="highlight">Бублик:</span> Крафт — создание предметов из ресурсов.
+                <span class="cmd-cursor"></span>
             </div>
         </div>
 
         <div class="cmd-welcome fade-in fade-in-delay-3">
-            <p style="font-size: 20px; font-weight: 600; color: var(--text);">Привет, я твой голосовой помощник</p>
+            <p style="font-size: 20px; font-weight: 600; color: var(--text);">Привет, я твой голосовой помощник с искусственным интеллектом</p>
             <p style="margin: 6px 0 18px;">Нажми «Подробнее», чтобы узнать, что я могу</p>
             <a class="btn btn-secondary" href="#features" style="font-size: 16px; padding: 12px 36px;">
                 ✦ Подробнее
             </a>
         </div>
+    </div>
 
-        <!-- Features -->
-        <section class="features" id="features">
-            <h2 class="section-title fade-in fade-in-delay-2">🔥 Ключевые возможности</h2>
-            <p class="section-sub fade-in fade-in-delay-3">Всё, что умеет Бублик v0.2 — из коробки, без интернета</p>
+    <!-- ===== КЛЮЧЕВЫЕ ВОЗМОЖНОСТИ (полная ширина) ===== -->
+    <section class="features-full" id="features">
+        <div class="section-header fade-in fade-in-delay-2">
+            <h2>🔥 Ключевые возможности v0.3</h2>
+        </div>
+        <p class="section-sub fade-in fade-in-delay-3">Всё, что умеет Бублик — из коробки, без интернета</p>
 
-            <div class="features-grid">
-
-                <div class="feature-card fade-in fade-in-delay-3">
-                    <div class="icon-wrap">🎤</div>
-                    <div class="content">
-                        <h3>Мгновенная активация</h3>
-                        <p>Скажите <strong>«Бублик»</strong> — ассистент готов слушать. Распознавание офлайн на базе Vosk.</p>
-                    </div>
+        <div class="tiles-grid">
+            <div class="feature-card">
+                <div class="icon-wrap">🎤</div>
+                <div class="content">
+                    <h3>Мгновенная активация</h3>
+                    <p>Скажите <strong>«Бублик»</strong> — ассистент готов слушать. Распознавание офлайн на базе Vosk.</p>
                 </div>
-
-                <div class="feature-card fade-in fade-in-delay-4">
-                    <div class="icon-wrap">📝</div>
-                    <div class="content">
-                        <h3>Заметки в Discord</h3>
-                        <p>Команда «Напиши заметку» — диктуйте текст, Бублик отправит его в Discord через Webhook.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-4">
-                    <div class="icon-wrap">🧮</div>
-                    <div class="content">
-                        <h3>Калькулятор</h3>
-                        <p>Голосовой ввод примеров («два плюс два»), результат можно отправить в Discord.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-5">
-                    <div class="icon-wrap">🚀</div>
-                    <div class="content">
-                        <h3>Управление приложениями</h3>
-                        <p>Откройте и закройте Discord, Spotify, Firefox, VS Code, Яндекс Музыку, YouTube и браузер.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-5">
-                    <div class="icon-wrap">🌤️</div>
-                    <div class="content">
-                        <h3>Погода</h3>
-                        <p>Команда «Погода» — откроет Яндекс.Погоду для вашего города (запоминает при первом запуске).</p>
-                    </div>
-                </div>
-
-                <div class="feature-card full fade-in fade-in-delay-5">
-                    <div class="icon-wrap">⏰</div>
-                    <div class="content">
-                        <h3>Напоминания</h3>
-                        <p>Установите напоминание с текстом и временем («в 15:30», «через 10 минут»). Бублик проговорит и отправит в Discord. Просмотр и отмена всех — голосом.</p>
-                        <span class="tag">сохраняются в reminders.json</span>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-6">
-                    <div class="icon-wrap">🖥️</div>
-                    <div class="content">
-                        <h3>Скриншоты</h3>
-                        <p>Команда «Скриншот» — создаёт снимок экрана и отправляет его в Discord. Временный файл удаляется.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-6">
-                    <div class="icon-wrap">🔍</div>
-                    <div class="content">
-                        <h3>Поиск в Google</h3>
-                        <p>Скажите «Давай найдём» и продиктуйте запрос — Бублик откроет Google с результатами поиска.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-7">
-                    <div class="icon-wrap">🎵</div>
-                    <div class="content">
-                        <h3>Медиа‑клавиши</h3>
-                        <p>Команды «Следующий трек» и «Назад» управляют плеером через системные мультимедиа‑клавиши.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-7">
-                    <div class="icon-wrap">🪟</div>
-                    <div class="content">
-                        <h3>Управление окном</h3>
-                        <p>Скройте консоль в трей («Скройся») или покажите её обратно. Управление через иконку в системном лотке.</p>
-                    </div>
-                </div>
-
-                <div class="feature-card fade-in fade-in-delay-7">
-                    <div class="icon-wrap">👤</div>
-                    <div class="content">
-                        <h3>Профиль пользователя</h3>
-                        <p>При первом запуске настройте имя, возраст, город и Discord Webhook — голосом.</p>
-                    </div>
-                </div>
-
             </div>
-        </section>
+            <div class="feature-card">
+                <div class="icon-wrap">🧠</div>
+                <div class="content">
+                    <h3>Локальный ИИ (Qwen 0.5B)</h3>
+                    <p>На любые вопросы, не попавшие в команды, отвечает через <strong>локальную LLM</strong>. Работает полностью офлайн.</p>
+                    <span class="tag">llama-cpp-python</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">📝</div>
+                <div class="content">
+                    <h3>Заметки в Discord</h3>
+                    <p>Команда «Напиши заметку» — диктуйте текст, Бублик отправит его в Discord через Webhook.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🧮</div>
+                <div class="content">
+                    <h3>Калькулятор</h3>
+                    <p>Голосовой ввод примеров («два плюс два»), результат можно отправить в Discord.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🚀</div>
+                <div class="content">
+                    <h3>Управление приложениями</h3>
+                    <p>Откройте и закройте Discord, Spotify, Firefox, VS Code, Яндекс Музыку, YouTube и браузер.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🌤️</div>
+                <div class="content">
+                    <h3>Погода</h3>
+                    <p>Команда «Погода» — откроет Яндекс.Погоду для вашего города (запоминает при первом запуске).</p>
+                </div>
+            </div>
+            <div class="feature-card full">
+                <div class="icon-wrap">⏰</div>
+                <div class="content">
+                    <h3>Напоминания</h3>
+                    <p>Установите напоминание с текстом и временем («в 15:30», «через 10 минут»). Бублик проговорит и отправит в Discord. Просмотр и отмена всех — голосом.</p>
+                    <span class="tag">сохраняются в reminders.json</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🖥️</div>
+                <div class="content">
+                    <h3>Скриншоты</h3>
+                    <p>Команда «Скриншот» — создаёт снимок экрана и отправляет его в Discord. Временный файл удаляется.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🔍</div>
+                <div class="content">
+                    <h3>Поиск в Google</h3>
+                    <p>Скажите «Давай найдём» и продиктуйте запрос — Бублик откроет Google с результатами поиска.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🎮</div>
+                <div class="content">
+                    <h3>База игр (200+)</h3>
+                    <p>Знает сотни игр: Roblox, Minecraft, CS2, Dota, Valorant и другие. Открывает, закрывает, рассказывает факты.</p>
+                    <span class="tag">games_db.json</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">💬</div>
+                <div class="content">
+                    <h3>Игровой сленг (200+ терминов)</h3>
+                    <p>Объясняет англицизмы: крафт, спавн, нуб, имба, фарм и т.д. Если не знает — спросит у ИИ.</p>
+                    <span class="tag">anglicisms_db.json</span>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">📐</div>
+                <div class="content">
+                    <h3>Конвертер единиц и дат</h3>
+                    <p>Переводит километры в мили, цельсий в фаренгейт, а также отвечает на вопросы о днях недели и Новом годе.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🎵</div>
+                <div class="content">
+                    <h3>Медиа‑клавиши</h3>
+                    <p>Команды «Следующий трек» и «Назад» управляют плеером через системные мультимедиа‑клавиши.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">🪟</div>
+                <div class="content">
+                    <h3>Управление окном</h3>
+                    <p>Скройте консоль в трей («Скройся») или покажите её обратно. Управление через иконку в системном лотке.</p>
+                </div>
+            </div>
+            <div class="feature-card">
+                <div class="icon-wrap">👤</div>
+                <div class="content">
+                    <h3>Профиль пользователя</h3>
+                    <p>При первом запуске настройте имя, возраст, город и Discord Webhook — голосом.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <!-- Что нового в v0.2 -->
-        <section class="fixes-section">
-            <h2>🚀 Что нового в v0.2</h2>
-            <ul>
-                <li><strong>полный редизайн</strong> — обновлённый интерфейс.</li>
-                <li><strong>команда «давай найдём»</strong> для поиска в Google — голосовой ввод запроса.</li>
-                <li><strong>поддержка Яндекс Музыки</strong> — открытие и закрытие приложения.</li>
-                <li><strong>расширенные списки триггеров</strong> — до 20+ вариантов произношения для каждой команды.</li>
-                <li><strong>исправлена задержка озвучки</strong> — голос отвечает быстрее.</li>
-                <li><strong>полное подавление логов Vosk</strong> — консоль чистая, только диалог и служебные маркеры.</li>
-                <li><strong>улучшенная обработка ошибок</strong> — стабильность выше.</li>
-            </ul>
-        </section>
-
-        <!-- Install -->
-        <section class="install-steps">
-            <h2>📦 Установка и запуск</h2>
-            <ol>
-                <li>Скачайте исполняемый файл <strong>Bublik.exe</strong> (ссылка на Google Диск).</li>
-                <li>При первом запуске потребуется скачать модель распознавания речи (откроется страница загрузки).</li>
-                <li>Распакуйте модель в папку <strong>C:\Users\Ваше_имя\model</strong>.</li>
-                <li>Запустите <strong>Bublik.exe</strong> — пройдите голосовую настройку (имя, город, Discord Webhook).</li>
-                <li>Готово! Говорите <strong>«Бублик»</strong> и управляйте голосом.</li>
-            </ol>
-            <p style="margin-top:24px; color:var(--text-muted); font-size:15px; font-weight:500;">
-                Бета‑версия v0.2 .<br />
-                <span style="font-weight:700; color:var(--badge-text);">Спасибо, что выбираете Бублика!</span>
-            </p>
-        </section>
-
-        <!-- Footer -->
+    <!-- ─── Footer ─── -->
+    <div class="container">
         <footer class="footer">
-            © 2026 Все права защищены · Автор: improve1337 · Bublik v0.2-beta
+            © 2026 Все права защищены · Автор: improve1337 · Bublik v0.3-beta
         </footer>
-
     </div>
 
     <!-- ─── Scripts ─── -->
     <script>
         (function() {
-            // ---- Leaves ----
-            const container = document.getElementById('leaves-container');
+            // ---- Particles ----
+            const container = document.getElementById('particles-container');
             setTimeout(() => {
-                for (let i = 0; i < 40; i++) {
-                    const leaf = document.createElement('div');
-                    leaf.className = 'leaf';
-                    leaf.style.left = Math.random() * 100 + 'vw';
-                    leaf.style.animationDuration = (7 + Math.random() * 10) + 's';
-                    leaf.style.animationDelay = Math.random() * 8 + 's';
-                    leaf.style.transform = 'scale(' + (0.5 + Math.random() * 1.1) + ')';
-                    leaf.style.width = (20 + Math.random() * 20) + 'px';
-                    leaf.style.height = (20 + Math.random() * 20) + 'px';
-                    container.appendChild(leaf);
+                for (let i = 0; i < 50; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    const size = 8 + Math.random() * 28;
+                    p.style.width = size + 'px';
+                    p.style.height = size + 'px';
+                    p.style.left = Math.random() * 100 + 'vw';
+                    p.style.animationDuration = (12 + Math.random() * 18) + 's';
+                    p.style.animationDelay = Math.random() * 10 + 's';
+                    p.style.opacity = 0.15 + Math.random() * 0.25;
+                    container.appendChild(p);
                 }
             }, 200);
 
@@ -1101,14 +947,39 @@
                 });
             });
 
-            // ---- Анимация глаз ----
+            // ---- Анимация глаз (каждые 0.5 сек) ----
             const eyes = document.getElementById('bublikEyes');
-            const frames = ['0_o', 'o_0', '0_0', '-_-'];
-            let index = 0;
+            const eyeFrames = ['0_o', 'o_0', '0_0', '-_-', '0_-', '-_0'];
             setInterval(() => {
-                index = (index + 1) % frames.length;
-                eyes.textContent = frames[index];
+                const randomIdx = Math.floor(Math.random() * eyeFrames.length);
+                eyes.textContent = eyeFrames[randomIdx];
             }, 500);
+
+            // ---- Интерактивный терминал ----
+            const cmdBody = document.getElementById('cmdBody');
+            const cmdPreview = document.getElementById('cmdPreview');
+
+            const dialogues = [
+                `<span class="user">Вы:</span> Сколько времени?<br><span class="highlight">Бублик:</span> 16:22`,
+                `<span class="user">Вы:</span> Открой дискорд<br><span class="highlight">Бублик:</span> секунду...`,
+                `<span class="user">Вы:</span> Расскажи про Майнкрафт<br><span class="highlight">Бублик:</span> Майнкрафт — игра-песочница, где игроки строят из блоков и выживают против монстров.`,
+                `<span class="user">Вы:</span> Что значит «имба»?<br><span class="highlight">Бублик:</span> Имба — слишком сильный, несбалансированный элемент игры.`,
+                `<span class="user">Вы:</span> Какая погода?<br><span class="highlight">Бублик:</span> Сейчас в городе Москва примерно +22 градуса, ясно.`,
+                `<span class="user">Вы:</span> Напомни мне купить хлеб в 18:00<br><span class="highlight">Бублик:</span> Напоминание установлено на 18:00.`,
+                `<span class="user">Вы:</span> Переведи 100 миль в километры<br><span class="highlight">Бублик:</span> Будет приблизительно 160.934 километров.`
+            ];
+
+            cmdPreview.addEventListener('click', function() {
+                const randomDialog = dialogues[Math.floor(Math.random() * dialogues.length)];
+                cmdBody.innerHTML = `
+                    <span class="ascii-art typewriter">Бублик — Голосовой Ассистент + AI</span>
+
+                    <span class="state">[0_0]</span> Активация: бублик
+                    <span class="highlight">Бублик:</span> я тут
+                    ${randomDialog}
+                    <span class="cmd-cursor"></span>
+                `;
+            });
 
         })();
     </script>
