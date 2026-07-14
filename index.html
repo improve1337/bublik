@@ -1,988 +1,1059 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Bublik v0.3 — голосовой ассистент для Windows с офлайн-распознаванием, локальным ИИ и базами данных игр и сленга." />
-    <title>Bublik v0.3 — голосовой ассистент</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
-    <style>
-        /* ── Reset & Base ── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bublik v0.3 — голосовой ассистент для Windows с офлайн-распознаванием, локальным ИИ и базами данных игр и сленга." />
+  <title>Bublik v0.3 — голосовой ассистент</title>
+  <link rel="icon" type="image/x-icon" href="bublik.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="bublik.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    /* ───────────────────────── RESET & BASE ───────────────────────── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        :root {
-            --bg: #fcf7f5;
-            --bg-card: rgba(255, 255, 255, 0.55);
-            --text: #1e1e2a;
-            --text-secondary: #4a4a5a;
-            --text-muted: #7a7a8a;
-            --border: rgba(0, 0, 0, 0.06);
-            --shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.14);
-            --gradient: linear-gradient(135deg, #ff9fb1, #ffc2a6);
-            --gradient-hover: linear-gradient(135deg, #ff8aa0, #ffb892);
-            --leaf-start: #ffc6b2;
-            --leaf-end: #ff9da7;
-            --badge-bg: rgba(255, 159, 177, 0.15);
-            --badge-text: #d45a7a;
-            --toggle-bg: #e8e0dd;
-            --code-bg: rgba(0, 0, 0, 0.04);
-            --scrollbar: #d0c8c4;
-            --card-hover: rgba(255, 159, 177, 0.06);
-            --icon-circle: rgba(255, 159, 177, 0.18);
-            --cmd-bg: #0c0c0c;
-            --cmd-text: #33ff33;
-            --cmd-border: #2a2a2a;
-            --cmd-title-bg: #1e1e1e;
-            --glow-color: rgba(255, 159, 177, 0.25);
-            --card-glow: 0 0 20px rgba(212, 90, 122, 0.15);
-        }
+    :root {
+      /* Warm editorial canvas — cursor.com-inspired, not pure white/black */
+      --bg: #f7f7f4;
+      --bg-card: #f2f1ed;
+      --bg-card-hover: #e6e5e0;
+      --bg-secondary: #e6e5e0;
+      --text: #26251e;
+      --text-secondary: #55534a;
+      --text-muted: #8a887c;
+      --border: rgba(38, 37, 30, 0.09);
+      --border-strong: rgba(38, 37, 30, 0.16);
+      --accent: #f54e00;
+      --accent-hover: #d8460a;
+      --accent-soft: rgba(245, 78, 0, 0.10);
+      --gold: #c08532;
+      --toggle-bg: #e6e5e0;
+      --code-bg: #1c1b17;
+      --code-text: #d9d6cc;
+      --scrollbar: #d8d6cf;
+      --cmd-bg: #1c1b17;
+      --cmd-text: #a9d8a9;
+      --cmd-border: rgba(255, 255, 255, 0.08);
+      --cmd-title-bg: #26251e;
+      --cursor-color: #f54e00;
+      --shadow-card: none;
+      --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --bubble-1: rgba(245, 78, 0, 0.16);
+      --bubble-2: rgba(192, 133, 50, 0.18);
+      --bubble-3: rgba(89, 122, 106, 0.14);
+      --bubble-4: rgba(106, 130, 168, 0.14);
+      --bubble-opacity: 0.55;
+    }
 
-        [data-theme="dark"] {
-            --bg: #12121a;
-            --bg-card: rgba(30, 30, 46, 0.60);
-            --text: #ececf0;
-            --text-secondary: #b0b0c8;
-            --text-muted: #7878a0;
-            --border: rgba(255, 255, 255, 0.06);
-            --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.8);
-            --leaf-start: #b07a8a;
-            --leaf-end: #8a5a6a;
-            --badge-bg: rgba(255, 159, 177, 0.12);
-            --badge-text: #ff9fb1;
-            --toggle-bg: #2a2a3a;
-            --code-bg: rgba(255, 255, 255, 0.05);
-            --scrollbar: #3a3a4a;
-            --card-hover: rgba(255, 159, 177, 0.08);
-            --icon-circle: rgba(255, 159, 177, 0.20);
-            --cmd-bg: #1a1a1a;
-            --cmd-text: #b0ffb0;
-            --cmd-border: #333;
-            --cmd-title-bg: #2a2a2a;
-            --glow-color: rgba(255, 159, 177, 0.30);
-            --card-glow: 0 0 25px rgba(255, 159, 177, 0.20);
-        }
+    [data-theme="dark"] {
+      --bg: #17160f;
+      --bg-card: #1e1d16;
+      --bg-card-hover: #26251c;
+      --bg-secondary: #26251c;
+      --text: #eeece2;
+      --text-secondary: #b6b3a4;
+      --text-muted: #837f6e;
+      --border: rgba(238, 236, 226, 0.09);
+      --border-strong: rgba(238, 236, 226, 0.18);
+      --accent: #ff6a2b;
+      --accent-hover: #ff8047;
+      --accent-soft: rgba(255, 106, 43, 0.14);
+      --gold: #d9a24f;
+      --toggle-bg: #26251c;
+      --code-bg: #0e0d09;
+      --code-text: #d9d6cc;
+      --scrollbar: #3a3829;
+      --cmd-bg: #0e0d09;
+      --cmd-text: #a9d8a9;
+      --cmd-border: rgba(255, 255, 255, 0.08);
+      --cmd-title-bg: #1e1d16;
+      --cursor-color: #ff6a2b;
+      --bubble-1: rgba(255, 106, 43, 0.20);
+      --bubble-2: rgba(217, 162, 79, 0.20);
+      --bubble-3: rgba(96, 140, 118, 0.18);
+      --bubble-4: rgba(120, 150, 194, 0.18);
+      --bubble-opacity: 0.65;
+    }
 
-        html {
-            scroll-behavior: smooth;
-        }
+    html {
+      scroll-behavior: smooth;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            transition: background .4s ease, color .4s ease;
-            overflow-x: hidden;
-            position: relative;
-        }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+      overflow-x: hidden;
+      cursor: none;
+      position: relative;
+    }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--scrollbar);
-            border-radius: 12px;
-        }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar);
+      border-radius: 12px;
+    }
 
-        /* ── Particles ── */
-        .particle {
-            position: fixed;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            background: radial-gradient(circle, var(--leaf-start), var(--leaf-end));
-            opacity: 0.3;
-            filter: blur(6px);
-            will-change: transform;
-            animation: float linear infinite;
-            transition: background .4s ease;
-        }
-        @keyframes float {
-            0% {
-                transform: translateY(110vh) scale(0.2) rotate(0deg);
-                opacity: 0.2;
-            }
-            50% {
-                opacity: 0.5;
-            }
-            100% {
-                transform: translateY(-20vh) scale(1.2) rotate(720deg);
-                opacity: 0;
-            }
-        }
+    /* ───────────────────────── CUSTOM CURSOR ───────────────────────── */
+    #custom-cursor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid var(--cursor-color);
+      transition: transform 0.15s ease, width 0.2s, height 0.2s, background 0.2s, border-color 0.2s;
+      transform: translate(-50%, -50%);
+      will-change: transform;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #custom-cursor .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--cursor-color);
+      transition: all 0.2s;
+    }
+    #custom-cursor.hover {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    #custom-cursor.hover .dot {
+      width: 5px;
+      height: 5px;
+    }
 
-        /* ── Theme Toggle ── */
-        .theme-toggle {
-            position: fixed;
-            top: 28px;
-            right: 28px;
-            z-index: 100;
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 60px;
-            padding: 10px 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: background .3s, box-shadow .3s, border .3s;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            user-select: none;
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        .theme-toggle:hover {
-            box-shadow: var(--shadow-hover);
-        }
-        .theme-toggle .icon {
-            font-size: 20px;
-            line-height: 1;
-        }
-        .theme-toggle .label {
-            display: none;
-        }
-        @media (min-width: 600px) {
-            .theme-toggle .label {
-                display: inline;
-            }
-        }
-        .theme-toggle .switch {
-            width: 44px;
-            height: 24px;
-            background: var(--toggle-bg);
-            border-radius: 40px;
-            position: relative;
-            transition: background .3s;
-            flex-shrink: 0;
-        }
-        .theme-toggle .switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: transform .3s, background .3s;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
-        }
-        [data-theme="dark"] .theme-toggle .switch {
-            background: #4a4a6a;
-        }
-        [data-theme="dark"] .theme-toggle .switch::after {
-            transform: translateX(20px);
-            background: #f0e8e4;
-        }
+    @media (max-width: 768px) {
+      #custom-cursor {
+        display: none;
+      }
+      body {
+        cursor: auto;
+      }
+    }
 
-        /* ── Container ── */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 100px 30px 60px;
-            position: relative;
-            z-index: 2;
-        }
+    /* ───────────────────────── FLOATING BUBBLES ───────────────────────── */
+    .bubbles {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bubble {
+      position: absolute;
+      bottom: -220px;
+      border-radius: 50%;
+      filter: blur(1px);
+      opacity: 0;
+      background: radial-gradient(circle at 32% 30%, rgba(255,255,255,0.55), transparent 60%),
+                  radial-gradient(circle at center, var(--bubble-color, var(--bubble-1)), transparent 72%);
+      animation: bubbleFloat linear infinite;
+      will-change: transform, opacity;
+      transition: background var(--transition);
+    }
+    @keyframes bubbleFloat {
+      0% {
+        transform: translate(0, 0) scale(0.9);
+        opacity: 0;
+      }
+      8% {
+        opacity: var(--bubble-opacity);
+      }
+      50% {
+        transform: translate(var(--drift, 30px), -55vh) scale(1.04);
+      }
+      88% {
+        opacity: var(--bubble-opacity);
+      }
+      100% {
+        transform: translate(calc(var(--drift, 30px) * 2), -115vh) scale(0.96);
+        opacity: 0;
+      }
+    }
 
-        /* ── Animations ── */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        @keyframes typewriter {
-            from {
-                width: 0;
-            }
-            to {
-                width: 100%;
-            }
-        }
+    .bubble:nth-child(1) { left: 6%;  width: 90px;  height: 90px;  --bubble-color: var(--bubble-1); --drift: 60px;  animation-duration: 26s; animation-delay: 0s; }
+    .bubble:nth-child(2) { left: 18%; width: 46px;  height: 46px;  --bubble-color: var(--bubble-2); --drift: -40px; animation-duration: 19s; animation-delay: 3s; }
+    .bubble:nth-child(3) { left: 30%; width: 130px; height: 130px; --bubble-color: var(--bubble-3); --drift: 50px;  animation-duration: 32s; animation-delay: 1s; }
+    .bubble:nth-child(4) { left: 44%; width: 60px;  height: 60px;  --bubble-color: var(--bubble-4); --drift: -70px; animation-duration: 23s; animation-delay: 8s; }
+    .bubble:nth-child(5) { left: 58%; width: 100px; height: 100px; --bubble-color: var(--bubble-2); --drift: 45px;  animation-duration: 29s; animation-delay: 5s; }
+    .bubble:nth-child(6) { left: 70%; width: 54px;  height: 54px;  --bubble-color: var(--bubble-1); --drift: -35px; animation-duration: 21s; animation-delay: 10s; }
+    .bubble:nth-child(7) { left: 82%; width: 116px; height: 116px; --bubble-color: var(--bubble-4); --drift: 65px;  animation-duration: 34s; animation-delay: 2s; }
+    .bubble:nth-child(8) { left: 92%; width: 40px;  height: 40px;  --bubble-color: var(--bubble-3); --drift: -50px; animation-duration: 17s; animation-delay: 6.5s; }
+    .bubble:nth-child(9) { left: 12%; width: 34px;  height: 34px;  --bubble-color: var(--bubble-4); --drift: 25px;  animation-duration: 15s; animation-delay: 12s; }
+    .bubble:nth-child(10){ left: 50%; width: 76px;  height: 76px;  --bubble-color: var(--bubble-1); --drift: -25px; animation-duration: 27s; animation-delay: 14s; }
 
-        .fade-in {
-            opacity: 0;
-            animation: fadeInUp 0.8s ease forwards;
-        }
-        .fade-in-delay-1 { animation-delay: 0.1s; }
-        .fade-in-delay-2 { animation-delay: 0.2s; }
-        .fade-in-delay-3 { animation-delay: 0.3s; }
-        .fade-in-delay-4 { animation-delay: 0.4s; }
-        .fade-in-delay-5 { animation-delay: 0.5s; }
-        .fade-in-delay-6 { animation-delay: 0.6s; }
-        .fade-in-delay-7 { animation-delay: 0.7s; }
-        .fade-in-delay-8 { animation-delay: 0.8s; }
+    @media (max-width: 560px) {
+      .bubble:nth-child(3), .bubble:nth-child(5), .bubble:nth-child(7) {
+        display: none;
+      }
+    }
 
-        /* ── Hero ── */
-        .hero {
-            text-align: center;
-            padding: 30px 0 50px;
-            position: relative;
-        }
+    @media (prefers-reduced-motion: reduce) {
+      .bubble { display: none; }
+    }
 
-        .hero .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--badge-bg);
-            color: var(--badge-text);
-            padding: 8px 22px;
-            border-radius: 60px;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: .3px;
-            margin-bottom: 28px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--border);
-            transition: background .3s, color .3s;
-        }
-        .hero .badge .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ff9fb1;
-            animation: pulse-dot 1.8s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .3; transform: scale(.7); }
-        }
+    /* ───────────────────────── CONTAINER ───────────────────────── */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 72px 32px 40px;
+      position: relative;
+      z-index: 2;
+    }
 
-        .hero h1 {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.3em;
-            font-size: clamp(52px, 10vw, 100px);
-            font-weight: 900;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            line-height: 1.1;
-            margin-bottom: 12px;
-            transition: background .3s;
-        }
-        .hero h1 .bublik-text {
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 30px var(--glow-color));
-        }
-        .hero h1 .bublik-eyes {
-            font-size: 0.6em;
-            background: none;
-            -webkit-text-fill-color: initial;
-            color: var(--badge-text);
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-shadow: 0 0 20px var(--glow-color);
-            transition: all 0.15s;
-            display: inline-block;
-        }
+    /* ───────────────────────── ANIMATIONS ───────────────────────── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes typewriter {
+      from { width: 0; }
+      to { width: 100%; }
+    }
 
-        .hero .actions {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 18px;
-        }
+    .fade-in {
+      opacity: 0;
+      animation: fadeInUp 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    .fade-in-delay-1 { animation-delay: 0.05s; }
+    .fade-in-delay-2 { animation-delay: 0.12s; }
+    .fade-in-delay-3 { animation-delay: 0.19s; }
+    .fade-in-delay-4 { animation-delay: 0.26s; }
+    .fade-in-delay-5 { animation-delay: 0.33s; }
+    .fade-in-delay-6 { animation-delay: 0.40s; }
+    .fade-in-delay-7 { animation-delay: 0.47s; }
+    .fade-in-delay-8 { animation-delay: 0.54s; }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 18px;
-            padding: 16px 44px;
-            border-radius: 60px;
-            transition: all .3s;
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-        }
-        .btn-primary {
-            background: var(--gradient);
-            color: #fff;
-            box-shadow: 0 12px 30px rgba(255, 150, 150, .3), 0 0 40px var(--glow-color);
-        }
-        .btn-primary:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 45px rgba(255, 150, 150, .45), 0 0 60px var(--glow-color);
-            background: var(--gradient-hover);
-        }
-        .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: var(--shadow);
-        }
-        .btn-secondary:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in, .blob-1, .blob-2 { animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
 
-        .version-chip {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 600;
-            background: var(--code-bg);
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            letter-spacing: .3px;
-            transition: background .3s, color .3s;
-        }
+    /* ───────────────────────── THEME TOGGLE ───────────────────────── */
+    .theme-toggle {
+      position: fixed;
+      top: 24px;
+      right: 32px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px 7px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--transition), border-color var(--transition);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+    }
+    .theme-toggle .icon {
+      font-size: 13px;
+      line-height: 1;
+    }
+    .theme-toggle .switch {
+      position: relative;
+      width: 30px;
+      height: 17px;
+      background: var(--toggle-bg);
+      border-radius: 20px;
+      transition: background var(--transition);
+    }
+    .theme-toggle .switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: transform var(--transition);
+    }
+    [data-theme="dark"] .theme-toggle .switch::after {
+      transform: translateX(13px);
+    }
 
-        /* ── CMD Preview ── */
-        .cmd-preview {
-            margin: 40px auto 30px;
-            max-width: 860px;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow), 0 0 40px var(--glow-color);
-            border: 1px solid var(--border);
-            background: var(--cmd-bg);
-            transition: border .3s, box-shadow .3s;
-            cursor: pointer;
-        }
-        .cmd-preview:hover {
-            box-shadow: var(--shadow-hover), 0 0 60px var(--glow-color);
-        }
-        .cmd-preview .cmd-header {
-            background: var(--cmd-title-bg);
-            padding: 10px 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--cmd-border);
-        }
-        .cmd-preview .cmd-dots {
-            display: flex;
-            gap: 8px;
-        }
-        .cmd-preview .cmd-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #ff5f57;
-        }
-        .cmd-preview .cmd-dot:nth-child(2) {
-            background: #ffbd2e;
-        }
-        .cmd-preview .cmd-dot:nth-child(3) {
-            background: #28c840;
-        }
-        .cmd-preview .cmd-title {
-            color: #aaa;
-            font-size: 14px;
-            font-weight: 600;
-            margin-left: 6px;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: .3px;
-        }
-        .cmd-preview .cmd-body {
-            padding: 20px 22px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--cmd-text);
-            background: var(--cmd-bg);
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .cmd-body .highlight {
-            color: #ff9fb1;
-        }
-        .cmd-body .user {
-            color: #b3ff8f;
-        }
-        .cmd-body .ascii-art {
-            color: #66d9ff;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-        .cmd-body .state {
-            color: #ffcc66;
-        }
-        .cmd-body .sys {
-            color: #888;
-        }
-        .cmd-body .cmd-cursor {
-            display: inline-block;
-            width: 10px;
-            height: 18px;
-            background: var(--cmd-text);
-            vertical-align: text-bottom;
-            animation: blink 1s step-end infinite;
-            box-shadow: 0 0 10px var(--cmd-text), 0 0 30px var(--cmd-text);
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+    /* ───────────────────────── HERO ───────────────────────── */
+    .hero {
+      text-align: center;
+      padding-top: 24px;
+    }
 
-        .cmd-body .typewriter {
-            display: inline-block;
-            overflow: hidden;
-            white-space: nowrap;
-            animation: typewriter 1.8s steps(40) 0.5s forwards;
-            width: 0;
-        }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+      margin-bottom: 28px;
+    }
+    .badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
 
-        /* ── CMD welcome ── */
-        .cmd-welcome {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 50px;
-            font-size: 18px;
-            color: var(--text-secondary);
-        }
-        .cmd-welcome .btn {
-            margin-top: 12px;
-            font-size: 16px;
-            padding: 12px 36px;
-        }
+    .hero h1 {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.18em;
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(56px, 10vw, 108px);
+      letter-spacing: -0.01em;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .hero h1 .bublik-eyes {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      font-size: 0.34em;
+      color: var(--accent);
+      letter-spacing: 0;
+      transform: translateY(-0.1em);
+    }
 
-        /* ── Полноширинный раздел с плитками ── */
-        .features-full {
-            width: 100%;
-            padding: 40px 30px;
-            background: transparent;
-            position: relative;
-            z-index: 2;
-        }
+    .hero .subtitle {
+      margin-top: 22px;
+      font-family: 'Lora', serif;
+      font-size: 18.5px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: 0;
+      max-width: 460px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
 
-        .features-full .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .features-full .section-header h2 {
-            font-size: 28px;
-            font-weight: 800;
-            margin: 0;
-        }
-        .features-full .section-sub {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 18px;
-            font-weight: 400;
-            max-width: 1200px;
-            margin: 0 auto 20px;
-        }
+    .hero .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
 
-        .tiles-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 24px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition), color var(--transition);
+      cursor: none;
+    }
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+    .btn-primary:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-strong);
+    }
 
-        /* ── квадратные плитки ── */
-        .feature-card {
-            flex: 0 0 auto;
-            width: 280px;
-            height: 280px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 24px 22px;
-            border-radius: 20px;
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--badge-text);
-            box-shadow: var(--shadow), var(--card-glow);
-            transition: box-shadow 0.3s ease;
-            overflow: hidden;
-            pointer-events: none;
-            user-select: none;
-        }
+    .version-chip {
+      display: inline-block;
+      margin-top: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+    }
 
-        .feature-card .icon-wrap {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--icon-circle);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            flex-shrink: 0;
-            margin-bottom: 12px;
-        }
-        .feature-card .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .feature-card h3 {
-            font-size: 19px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            letter-spacing: -0.3px;
-            color: var(--text);
-        }
-        .feature-card p {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-            font-weight: 400;
-            margin: 0;
-            flex: 1;
-            overflow: hidden;
-        }
-        .feature-card .tag {
-            display: inline-block;
-            margin-top: 10px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            color: var(--badge-text);
-            background: var(--badge-bg);
-            padding: 2px 12px;
-            border-radius: 40px;
-            align-self: flex-start;
-        }
-        .feature-card.full {
-            width: 280px;
-            height: 280px;
-            padding: 24px 22px;
-        }
+    /* ───────────────────────── TERMINAL ───────────────────────── */
+    .cmd-preview {
+      max-width: 720px;
+      margin: 56px auto 0;
+      background: var(--cmd-bg);
+      border: 1px solid var(--cmd-border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: none;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .cmd-preview:hover {
+      border-color: var(--border-strong);
+    }
+    .cmd-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--cmd-title-bg);
+      border-bottom: 1px solid var(--cmd-border);
+    }
+    .cmd-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .cmd-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .cmd-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.45);
+      margin-left: 4px;
+    }
+    .cmd-body {
+      padding: 22px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: var(--cmd-text);
+      white-space: pre-wrap;
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .cmd-body .ascii-art {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      color: #fff;
+      font-weight: 600;
+      animation: typewriter 1.6s steps(40, end);
+      margin-bottom: 6px;
+    }
+    .cmd-body .state {
+      color: var(--gold);
+    }
+    .cmd-body .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .cmd-body .user {
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .cmd-cursor {
+      color: var(--accent);
+      animation: blinkCursor 1s step-end infinite;
+    }
+    @keyframes blinkCursor {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
 
-        /* ── Responsive ── */
-        @media (max-width: 500px) {
-            .container {
-                padding: 80px 16px 40px;
-            }
-            .hero .actions .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            .theme-toggle {
-                top: 16px;
-                right: 16px;
-                padding: 8px 14px;
-                font-size: 12px;
-            }
-            .theme-toggle .switch {
-                width: 36px;
-                height: 20px;
-            }
-            .theme-toggle .switch::after {
-                width: 16px;
-                height: 16px;
-            }
-            [data-theme="dark"] .theme-toggle .switch::after {
-                transform: translateX(16px);
-            }
-            .feature-card {
-                width: 220px;
-                height: 220px;
-                padding: 16px;
-            }
-            .feature-card .icon-wrap {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-            .feature-card h3 {
-                font-size: 16px;
-            }
-            .feature-card p {
-                font-size: 13px;
-            }
-            .cmd-preview .cmd-body {
-                font-size: 12px;
-                padding: 16px;
-                max-height: 300px;
-            }
-            .cmd-body .typewriter {
-                white-space: normal;
-                animation: none;
-                width: auto;
-            }
-            .hero h1 {
-                flex-wrap: wrap;
-                gap: 0.2em;
-            }
-            .hero h1 .bublik-eyes {
-                font-size: 0.8em;
-            }
-            .features-full {
-                padding: 20px 10px;
-            }
-        }
+    .cmd-welcome {
+      text-align: center;
+      margin-top: 34px;
+    }
+    .cmd-welcome p:first-child {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: var(--accent);
+    }
+    .cmd-welcome p:nth-child(2) {
+      margin: 8px 0 22px;
+      font-family: 'Lora', serif;
+      font-size: 14.5px;
+      color: var(--text-muted);
+    }
 
-        /* ── Footer ── */
-        .footer {
-            margin-top: 70px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: .3px;
-            transition: border .3s, color .3s;
-            animation: fadeInUp 0.8s ease forwards;
-            opacity: 0;
-            animation-delay: 0.6s;
-        }
-        .footer span {
-            opacity: .6;
-        }
-    </style>
+    /* ───────────────────────── FEATURES ───────────────────────── */
+    .features-full {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 100px 32px 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-header {
+      text-align: left;
+      margin-bottom: 12px;
+    }
+    .section-header h2 {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(32px, 4.4vw, 46px);
+      letter-spacing: -0.005em;
+      color: var(--accent);
+    }
+    .section-sub {
+      text-align: left;
+      max-width: 480px;
+      font-family: 'Lora', serif;
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 1.65;
+      margin-bottom: 52px;
+    }
+
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      min-height: 190px;
+      transition: background var(--transition);
+      cursor: default;
+    }
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .feature-card .icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      margin-bottom: 18px;
+    }
+    .feature-card .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .feature-card h3 {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 21px;
+      font-weight: 400;
+      margin-bottom: 6px;
+      letter-spacing: 0;
+      color: var(--accent);
+    }
+    .feature-card p {
+      color: var(--text-secondary);
+      font-family: 'Lora', serif;
+      font-size: 14px;
+      line-height: 1.55;
+      font-weight: 400;
+      margin: 0 0 16px 0;
+    }
+    .feature-card .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .feature-card .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ───────────────────────── FOOTER ───────────────────────── */
+    .footer {
+      margin-top: 60px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      text-align: left;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      letter-spacing: 0.01em;
+    }
+
+    /* ───────────────────────── RESPONSIVE ───────────────────────── */
+    @media (max-width: 860px) {
+      .tiles-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .theme-toggle .label {
+        display: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        padding: 96px 20px 30px;
+      }
+      .features-full {
+        padding: 64px 20px 30px;
+      }
+      .hero .actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .theme-toggle {
+        top: 16px;
+        right: 16px;
+        padding: 6px 12px 6px 10px;
+      }
+      .tiles-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero h1 {
+        flex-wrap: wrap;
+        row-gap: 4px;
+      }
+      .cmd-body {
+        font-size: 12px;
+        padding: 16px;
+        max-height: 300px;
+      }
+      .cmd-body .ascii-art {
+        white-space: normal;
+        animation: none;
+        width: auto;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- ─── Particles ─── -->
-    <div id="particles-container"></div>
+  <!-- ─── CUSTOM CURSOR ─── -->
+  <div id="custom-cursor"><span class="dot"></span></div>
 
-    <!-- ─── Theme Toggle ─── -->
-    <div class="theme-toggle" id="themeToggle" role="button" tabindex="0" aria-label="Переключить тему">
-        <span class="icon" id="themeIcon">☀️</span>
-        <span class="label" id="themeLabel">Светлая</span>
-        <span class="switch"></span>
-    </div>
+  <!-- ─── FLOATING BUBBLES ─── -->
+  <div class="bubbles" aria-hidden="true">
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+    <span class="bubble"></span>
+  </div>
 
-    <!-- ─── Main ─── -->
-    <div class="container">
+  <!-- ─── THEME TOGGLE ─── -->
+  <div class="theme-toggle" id="themeToggle" role="button" tabindex="0" aria-label="Переключить тему">
+    <span class="icon" id="themeIcon">☀️</span>
+    <span class="label" id="themeLabel">Светлая</span>
+    <span class="switch"></span>
+  </div>
 
-        <!-- Hero -->
-        <section class="hero fade-in fade-in-delay-1">
-            <div class="badge">
-                <span class="dot"></span>
-                Beta v0.3 · Голосовой ассистент + ИИ
-            </div>
+  <!-- ─── MAIN ─── -->
+  <div class="container">
 
-            <h1>
-                <span class="bublik-text">Бублик</span>
-                <span class="bublik-eyes" id="bublikEyes">0_o</span>
-            </h1>
+    <!-- HERO -->
+    <section class="hero fade-in fade-in-delay-1">
+      <div class="badge">
+        <span class="dot"></span>
+        Beta v0.3 · Голосовой ассистент + ИИ
+      </div>
 
-            <div class="actions">
-                <a class="btn btn-primary"
-                   href="https://drive.google.com/file/d/1ecWPrziRVJm9kuWOSZ5I4PPkvUQQlttM/view?usp=drive_link"
-                   target="_blank">
-                    ⬇ Скачать v0.3
-                </a>
-                <a class="btn btn-secondary" href="#features">
-                    ✦ Подробнее
-                </a>
-            </div>
+      <h1>
+        <span class="bublik-text">Бублик</span>
+        <span class="bublik-eyes" id="bublikEyes">0_o</span>
+      </h1>
 
-            <div class="version-chip">текущая версия: beta v0.3</div>
-        </section>
+      <p class="subtitle">Голосовой помощник с локальным искусственным интеллектом</p>
 
-        <!-- ─── CMD Preview ─── -->
-        <div class="cmd-preview fade-in fade-in-delay-2" id="cmdPreview">
-            <div class="cmd-header">
-                <div class="cmd-dots">
-                    <span class="cmd-dot"></span>
-                    <span class="cmd-dot"></span>
-                    <span class="cmd-dot"></span>
-                </div>
-                <span class="cmd-title">Bublik Console v0.3</span>
-            </div>
-            <div class="cmd-body" id="cmdBody">
-                <span class="ascii-art typewriter">Бублик — Голосовой Ассистент + AI</span>
+      <div class="actions">
+        <a class="btn btn-primary"
+           href="https://drive.google.com/file/d/1ecWPrziRVJm9kuWOSZ5I4PPkvUQQlttM/view?usp=drive_link"
+           target="_blank">
+          ⬇ Скачать v0.3
+        </a>
+        <a class="btn btn-secondary" href="#features">
+          Подробнее
+        </a>
+      </div>
 
-                <span class="state">[0_0]</span> Активация: бублик
-                <span class="highlight">Бублик:</span> я тут
-                <span class="user">Вы:</span> сколько времени?
-                <span class="highlight">Бублик:</span> 15:49
-                <span class="user">Вы:</span> Открой ютуб
-                <span class="highlight">Бублик:</span> секунду...
-                <span class="user">Вы:</span> Расскажи про Доту
-                <span class="highlight">Бублик:</span> Дота 2 — командная MOBA-игра 5 на 5...
-                <span class="user">Вы:</span> Что значит «крафт»?
-                <span class="highlight">Бублик:</span> Крафт — создание предметов из ресурсов.
-                <span class="cmd-cursor"></span>
-            </div>
-        </div>
-
-        <div class="cmd-welcome fade-in fade-in-delay-3">
-            <p style="font-size: 20px; font-weight: 600; color: var(--text);">Привет, я твой голосовой помощник с искусственным интеллектом</p>
-            <p style="margin: 6px 0 18px;">Нажми «Подробнее», чтобы узнать, что я могу</p>
-            <a class="btn btn-secondary" href="#features" style="font-size: 16px; padding: 12px 36px;">
-                ✦ Подробнее
-            </a>
-        </div>
-    </div>
-
-    <!-- ===== КЛЮЧЕВЫЕ ВОЗМОЖНОСТИ (полная ширина) ===== -->
-    <section class="features-full" id="features">
-        <div class="section-header fade-in fade-in-delay-2">
-            <h2>🔥 Ключевые возможности v0.3</h2>
-        </div>
-        <p class="section-sub fade-in fade-in-delay-3">Всё, что умеет Бублик — из коробки, без интернета</p>
-
-        <div class="tiles-grid">
-            <div class="feature-card">
-                <div class="icon-wrap">🎤</div>
-                <div class="content">
-                    <h3>Мгновенная активация</h3>
-                    <p>Скажите <strong>«Бублик»</strong> — ассистент готов слушать. Распознавание офлайн на базе Vosk.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🧠</div>
-                <div class="content">
-                    <h3>Локальный ИИ (Qwen 0.5B)</h3>
-                    <p>На любые вопросы, не попавшие в команды, отвечает через <strong>локальную LLM</strong>. Работает полностью офлайн.</p>
-                    <span class="tag">llama-cpp-python</span>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">📝</div>
-                <div class="content">
-                    <h3>Заметки в Discord</h3>
-                    <p>Команда «Напиши заметку» — диктуйте текст, Бублик отправит его в Discord через Webhook.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🧮</div>
-                <div class="content">
-                    <h3>Калькулятор</h3>
-                    <p>Голосовой ввод примеров («два плюс два»), результат можно отправить в Discord.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🚀</div>
-                <div class="content">
-                    <h3>Управление приложениями</h3>
-                    <p>Откройте и закройте Discord, Spotify, Firefox, VS Code, Яндекс Музыку, YouTube и браузер.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🌤️</div>
-                <div class="content">
-                    <h3>Погода</h3>
-                    <p>Команда «Погода» — откроет Яндекс.Погоду для вашего города (запоминает при первом запуске).</p>
-                </div>
-            </div>
-            <div class="feature-card full">
-                <div class="icon-wrap">⏰</div>
-                <div class="content">
-                    <h3>Напоминания</h3>
-                    <p>Установите напоминание с текстом и временем («в 15:30», «через 10 минут»). Бублик проговорит и отправит в Discord. Просмотр и отмена всех — голосом.</p>
-                    <span class="tag">сохраняются в reminders.json</span>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🖥️</div>
-                <div class="content">
-                    <h3>Скриншоты</h3>
-                    <p>Команда «Скриншот» — создаёт снимок экрана и отправляет его в Discord. Временный файл удаляется.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🔍</div>
-                <div class="content">
-                    <h3>Поиск в Google</h3>
-                    <p>Скажите «Давай найдём» и продиктуйте запрос — Бублик откроет Google с результатами поиска.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🎮</div>
-                <div class="content">
-                    <h3>База игр (200+)</h3>
-                    <p>Знает сотни игр: Roblox, Minecraft, CS2, Dota, Valorant и другие. Открывает, закрывает, рассказывает факты.</p>
-                    <span class="tag">games_db.json</span>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">💬</div>
-                <div class="content">
-                    <h3>Игровой сленг (200+ терминов)</h3>
-                    <p>Объясняет англицизмы: крафт, спавн, нуб, имба, фарм и т.д. Если не знает — спросит у ИИ.</p>
-                    <span class="tag">anglicisms_db.json</span>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">📐</div>
-                <div class="content">
-                    <h3>Конвертер единиц и дат</h3>
-                    <p>Переводит километры в мили, цельсий в фаренгейт, а также отвечает на вопросы о днях недели и Новом годе.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🎵</div>
-                <div class="content">
-                    <h3>Медиа‑клавиши</h3>
-                    <p>Команды «Следующий трек» и «Назад» управляют плеером через системные мультимедиа‑клавиши.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">🪟</div>
-                <div class="content">
-                    <h3>Управление окном</h3>
-                    <p>Скройте консоль в трей («Скройся») или покажите её обратно. Управление через иконку в системном лотке.</p>
-                </div>
-            </div>
-            <div class="feature-card">
-                <div class="icon-wrap">👤</div>
-                <div class="content">
-                    <h3>Профиль пользователя</h3>
-                    <p>При первом запуске настройте имя, возраст, город и Discord Webhook — голосом.</p>
-                </div>
-            </div>
-        </div>
+      <div class="version-chip">текущая версия: beta v0.3</div>
     </section>
 
-    <!-- ─── Footer ─── -->
-    <div class="container">
-        <footer class="footer">
-            © 2026 Все права защищены · Автор: improve1337 · Bublik v0.3-beta
-        </footer>
+    <!-- TERMINAL -->
+    <div class="cmd-preview fade-in fade-in-delay-2" id="cmdPreview">
+      <div class="cmd-header">
+        <div class="cmd-dots">
+          <span class="cmd-dot"></span>
+          <span class="cmd-dot"></span>
+          <span class="cmd-dot"></span>
+        </div>
+        <span class="cmd-title">bublik-console — v0.3</span>
+      </div>
+      <div class="cmd-body" id="cmdBody">
+        <span class="ascii-art typewriter">Бублик — Голосовой Ассистент + AI</span>
+
+        <span class="state">[0_0]</span> Активация: бублик
+        <span class="highlight">Бублик:</span> я тут. Скажи «что ты умеешь», покажу список
+        <span class="user">Вы:</span> что ты умеешь?
+        <span class="highlight">Бублик:</span> заметки в Discord, калькулятор, запуск и закрытие программ, поиск в интернете, погода и время, напоминания, скриншоты, база из 221 игры, 151 игровой термин и англицизм, конвертер единиц, даты, локальный ИИ
+        <span class="cmd-cursor">▌</span>
+      </div>
     </div>
 
-    <!-- ─── Scripts ─── -->
-    <script>
-        (function() {
-            // ---- Particles ----
-            const container = document.getElementById('particles-container');
-            setTimeout(() => {
-                for (let i = 0; i < 50; i++) {
-                    const p = document.createElement('div');
-                    p.className = 'particle';
-                    const size = 8 + Math.random() * 28;
-                    p.style.width = size + 'px';
-                    p.style.height = size + 'px';
-                    p.style.left = Math.random() * 100 + 'vw';
-                    p.style.animationDuration = (12 + Math.random() * 18) + 's';
-                    p.style.animationDelay = Math.random() * 10 + 's';
-                    p.style.opacity = 0.15 + Math.random() * 0.25;
-                    container.appendChild(p);
-                }
-            }, 200);
+    <div class="cmd-welcome fade-in fade-in-delay-3">
+      <p>Привет, я твой голосовой помощник с искусственным интеллектом</p>
+      <p>Нажми на терминал, чтобы увидеть случайный диалог</p>
+      <a class="btn btn-secondary" href="#features">
+        Подробнее
+      </a>
+    </div>
+  </div>
 
-            // ---- Theme Toggle ----
-            const toggle = document.getElementById('themeToggle');
-            const icon = document.getElementById('themeIcon');
-            const label = document.getElementById('themeLabel');
-            const html = document.documentElement;
+  <!-- FEATURES -->
+  <section class="features-full" id="features">
+    <div class="section-header fade-in fade-in-delay-2">
+      <h2>Возможности, которые звучат по-человечески</h2>
+    </div>
+    <p class="section-sub fade-in fade-in-delay-3">
+      Бублик не пытается быть холодной панелью управления —
+      он помогает быстро, локально и немного с характером.
+    </p>
 
-            const stored = localStorage.getItem('bublik-theme');
-            if (stored === 'dark') {
-                html.setAttribute('data-theme', 'dark');
-                icon.textContent = '🌙';
-                label.textContent = 'Тёмная';
-            } else {
-                html.removeAttribute('data-theme');
-                icon.textContent = '☀️';
-                label.textContent = 'Светлая';
+    <div class="tiles-grid">
+      <!-- 1. Голосовой старт -->
+      <div class="feature-card fade-in fade-in-delay-2">
+        <div class="icon-wrap">🎤</div>
+        <div class="content">
+          <h3>Голосовой старт</h3>
+          <p>Слышит короткие команды.</p>
+          <div class="tags">
+            <span class="tag">voice</span>
+            <span class="tag">discord</span>
+            <span class="tag">notes</span>
+            <span class="tag">CLI</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Локальная память -->
+      <div class="feature-card fade-in fade-in-delay-3">
+        <div class="icon-wrap">🔒</div>
+        <div class="content">
+          <h3>Локальная память</h3>
+          <p>Контекст остаётся у тебя.</p>
+          <div class="tags">
+            <span class="tag">privacy</span>
+            <span class="tag">screens</span>
+            <span class="tag">offline</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Умные пинки -->
+      <div class="feature-card fade-in fade-in-delay-4">
+        <div class="icon-wrap">⏰</div>
+        <div class="content">
+          <h3>Умные пинки</h3>
+          <p>Напомнит без давления.</p>
+          <div class="tags">
+            <span class="tag">remind</span>
+            <span class="tag">gaming</span>
+            <span class="tag">friendly</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Discord заметки -->
+      <div class="feature-card fade-in fade-in-delay-5">
+        <div class="icon-wrap">📝</div>
+        <div class="content">
+          <h3>Discord заметки</h3>
+          <p>Отправляет мысли в конор.</p>
+          <div class="tags">
+            <span class="tag">notes</span>
+            <span class="tag">CLI</span>
+            <span class="tag">terminal</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Снимки экрана -->
+      <div class="feature-card fade-in fade-in-delay-6">
+        <div class="icon-wrap">🖥️</div>
+        <div class="content">
+          <h3>Снимки экрана</h3>
+          <p>Сохраняет визуальный контекст.</p>
+          <div class="tags">
+            <span class="tag">screen</span>
+            <span class="tag">gaming</span>
+            <span class="tag">friendly</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Игровые базы -->
+      <div class="feature-card fade-in fade-in-delay-7">
+        <div class="icon-wrap">🎮</div>
+        <div class="content">
+          <h3>Игровые базы</h3>
+          <p>Команды под игры и сленг.</p>
+          <div class="tags">
+            <span class="tag">gaming</span>
+            <span class="tag">friendly</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Быстрый поиск -->
+      <div class="feature-card fade-in fade-in-delay-8">
+        <div class="icon-wrap">🔍</div>
+        <div class="content">
+          <h3>Быстрый поиск</h3>
+          <p>Находит нужное в командах.</p>
+          <div class="tags">
+            <span class="tag">search</span>
+            <span class="tag">audio</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Чистый звук -->
+      <div class="feature-card fade-in fade-in-delay-2">
+        <div class="icon-wrap">🔊</div>
+        <div class="content">
+          <h3>Чистый звук</h3>
+          <p>Подходит для коротких фраз.</p>
+          <div class="tags">
+            <span class="tag">audio</span>
+            <span class="tag">clarity</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Скачать v0.3 -->
+      <div class="feature-card fade-in fade-in-delay-3">
+        <div class="icon-wrap">⬇️</div>
+        <div class="content">
+          <h3>Скачать v0.3</h3>
+          <p>Главный путь к первому запуску.</p>
+          <div class="tags">
+            <span class="tag">beta</span>
+            <span class="tag">setup</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="container" style="padding-top: 0;">
+    <footer class="footer">
+      © 2026 Все права защищены · Автор: improve1337 · Bublik v0.3-beta
+    </footer>
+  </div>
+
+  <!-- ─── SCRIPTS ─── -->
+  <script>
+    (function() {
+      // ---- Custom cursor ----
+      const cursor = document.getElementById('custom-cursor');
+      if (window.innerWidth > 768) {
+        document.addEventListener('mousemove', (e) => {
+          cursor.style.left = e.clientX + 'px';
+          cursor.style.top = e.clientY + 'px';
+        });
+        const interactive = document.querySelectorAll('a, .btn, .cmd-preview, .feature-card, .theme-toggle');
+        interactive.forEach(el => {
+          el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+          el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+      }
+
+      // ---- Theme toggle ----
+      const toggle = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      const html = document.documentElement;
+
+      const stored = localStorage.getItem('bublik-theme');
+      if (stored === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+        icon.textContent = '🌙';
+        label.textContent = 'Тёмная';
+      } else {
+        html.removeAttribute('data-theme');
+        icon.textContent = '☀️';
+        label.textContent = 'Светлая';
+      }
+
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          html.removeAttribute('data-theme');
+          localStorage.setItem('bublik-theme', 'light');
+          icon.textContent = '☀️';
+          label.textContent = 'Светлая';
+        } else {
+          html.setAttribute('data-theme', 'dark');
+          localStorage.setItem('bublik-theme', 'dark');
+          icon.textContent = '🌙';
+          label.textContent = 'Тёмная';
+        }
+      });
+
+      toggle.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle.click();
+        }
+      });
+
+      // ---- Smooth anchor ----
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          if (href === '#') return;
+          const target = document.querySelector(href);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      // ---- Animated eyes ----
+      const eyes = document.getElementById('bublikEyes');
+      const eyeFrames = ['0_o', 'o_0', '0_0', '-_-', '0_-', '-_0'];
+      setInterval(() => {
+        const randomIdx = Math.floor(Math.random() * eyeFrames.length);
+        eyes.textContent = eyeFrames[randomIdx];
+      }, 500);
+
+      // ---- Interactive terminal (без мигания) ----
+      const cmdBody = document.getElementById('cmdBody');
+      const cmdPreview = document.getElementById('cmdPreview');
+
+      const dialogues = [
+        `<span class="user">Вы:</span> Напиши заметку<br><span class="highlight">Бублик:</span> диктуй, отправлю прямо в твой Discord`,
+        `<span class="user">Вы:</span> Давай посчитаем: сто разделить на пять<br><span class="highlight">Бублик:</span> будет 20. Сохранить в лог? Скажи «отправь на вебхук»`,
+        `<span class="user">Вы:</span> Открой Роблокс<br><span class="highlight">Бублик:</span> секунду... нашёл в базе из 221 игры`,
+        `<span class="user">Вы:</span> Закрой Спотифай<br><span class="highlight">Бублик:</span> закрываю Spotify`,
+        `<span class="user">Вы:</span> Давай найдём последние новости Dota 2<br><span class="highlight">Бублик:</span> открываю поиск в Google`,
+        `<span class="user">Вы:</span> Кто я?<br><span class="highlight">Бублик:</span> помню твой профиль — можем сбросить командой «сброс настроек»`,
+        `<span class="user">Вы:</span> Напомни мне купить хлеб в 18:00<br><span class="highlight">Бублик:</span> напоминание установлено, пришлю в Discord ровно в 18:00`,
+        `<span class="user">Вы:</span> Сделай скриншот<br><span class="highlight">Бублик:</span> снимок сделан и отправлен в твой Discord-канал`,
+        `<span class="user">Вы:</span> Что значит «имба»?<br><span class="highlight">Бублик:</span> слишком сильный, несбалансированный элемент игры (от англ. imbalanced) — из базы в 151 термин`,
+        `<span class="user">Вы:</span> Что значит «афк»?<br><span class="highlight">Бублик:</span> отсутствие от клавиатуры, неактивен (от англ. away from keyboard)`,
+        `<span class="user">Вы:</span> Расскажи про CS2<br><span class="highlight">Бублик:</span> Контр-Страйк 2 — командный тактический шутер от Valve на движке Source 2`,
+        `<span class="user">Вы:</span> Переведи 10 километров в мили<br><span class="highlight">Бублик:</span> будет примерно 6.21 мили`,
+        `<span class="user">Вы:</span> Сколько будет 20 цельсия в фаренгейтах?<br><span class="highlight">Бублик:</span> это 68 градусов по Фаренгейту`,
+        `<span class="user">Вы:</span> Сколько дней до Нового года?<br><span class="highlight">Бублик:</span> считаю по календарю и отвечаю сразу`,
+        `<span class="user">Вы:</span> What does "noob" mean?<br><span class="highlight">Bublik:</span> a newbie, an inexperienced player — I can reply in English too`,
+        `<span class="user">Вы:</span> Следующий трек<br><span class="highlight">Бублик:</span> переключаю плеер`,
+        `<span class="user">Вы:</span> Какая погода?<br><span class="highlight">Бублик:</span> сейчас в городе Москва примерно +22 градуса, ясно`
+      ];
+
+      cmdPreview.addEventListener('click', function() {
+        const randomDialog = dialogues[Math.floor(Math.random() * dialogues.length)];
+        cmdBody.innerHTML = `
+          <span class="ascii-art typewriter">Бублик — Голосовой Ассистент + AI</span>
+
+          <span class="state">[0_0]</span> Активация: бублик
+          <span class="highlight">Бублик:</span> я тут
+          ${randomDialog}
+          <span class="cmd-cursor">▌</span>
+        `;
+        // Re-trigger typewriter
+        const tw = cmdBody.querySelector('.typewriter');
+        if (tw) {
+          tw.style.animation = 'none';
+          tw.offsetHeight;
+          tw.style.animation = '';
+        }
+      });
+
+      // ---- Intersection Observer for cards ----
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
             }
+          });
+        }, { threshold: 0.1 });
 
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                const isDark = html.getAttribute('data-theme') === 'dark';
-                if (isDark) {
-                    html.removeAttribute('data-theme');
-                    localStorage.setItem('bublik-theme', 'light');
-                    icon.textContent = '☀️';
-                    label.textContent = 'Светлая';
-                } else {
-                    html.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('bublik-theme', 'dark');
-                    icon.textContent = '🌙';
-                    label.textContent = 'Тёмная';
-                }
-            });
+        document.querySelectorAll('.feature-card').forEach(card => {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          observer.observe(card);
+        });
+      } else {
+        document.querySelectorAll('.feature-card').forEach(card => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        });
+      }
 
-            toggle.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    toggle.click();
-                }
-            });
-
-            // ---- Smooth anchor ----
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-                    if (href === '#') return;
-                    const target = document.querySelector(href);
-                    if (target) {
-                        e.preventDefault();
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                });
-            });
-
-            // ---- Анимация глаз (каждые 0.5 сек) ----
-            const eyes = document.getElementById('bublikEyes');
-            const eyeFrames = ['0_o', 'o_0', '0_0', '-_-', '0_-', '-_0'];
-            setInterval(() => {
-                const randomIdx = Math.floor(Math.random() * eyeFrames.length);
-                eyes.textContent = eyeFrames[randomIdx];
-            }, 500);
-
-            // ---- Интерактивный терминал ----
-            const cmdBody = document.getElementById('cmdBody');
-            const cmdPreview = document.getElementById('cmdPreview');
-
-            const dialogues = [
-                `<span class="user">Вы:</span> Сколько времени?<br><span class="highlight">Бублик:</span> 16:22`,
-                `<span class="user">Вы:</span> Открой дискорд<br><span class="highlight">Бублик:</span> секунду...`,
-                `<span class="user">Вы:</span> Расскажи про Майнкрафт<br><span class="highlight">Бублик:</span> Майнкрафт — игра-песочница, где игроки строят из блоков и выживают против монстров.`,
-                `<span class="user">Вы:</span> Что значит «имба»?<br><span class="highlight">Бублик:</span> Имба — слишком сильный, несбалансированный элемент игры.`,
-                `<span class="user">Вы:</span> Какая погода?<br><span class="highlight">Бублик:</span> Сейчас в городе Москва примерно +22 градуса, ясно.`,
-                `<span class="user">Вы:</span> Напомни мне купить хлеб в 18:00<br><span class="highlight">Бублик:</span> Напоминание установлено на 18:00.`,
-                `<span class="user">Вы:</span> Переведи 100 миль в километры<br><span class="highlight">Бублик:</span> Будет приблизительно 160.934 километров.`
-            ];
-
-            cmdPreview.addEventListener('click', function() {
-                const randomDialog = dialogues[Math.floor(Math.random() * dialogues.length)];
-                cmdBody.innerHTML = `
-                    <span class="ascii-art typewriter">Бублик — Голосовой Ассистент + AI</span>
-
-                    <span class="state">[0_0]</span> Активация: бублик
-                    <span class="highlight">Бублик:</span> я тут
-                    ${randomDialog}
-                    <span class="cmd-cursor"></span>
-                `;
-            });
-
-        })();
-    </script>
+    })();
+  </script>
 
 </body>
 </html>
